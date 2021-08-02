@@ -1,6 +1,6 @@
 <template>
     <nav>
-        <v-toolbar flat>
+        <v-app-bar flat app>
             <v-toolbar-title class="pr-10">
                 <div class="d-flex flex-no-wrap justify-space-between">
                     <span class="font-weight-light">Clínica</span>
@@ -21,7 +21,7 @@
                 <span>Meu Perfil</span>
                 <v-icon right color="primary">mdi-account</v-icon>
             </v-btn>
-        </v-toolbar>
+        </v-app-bar>
     </nav>
 </template>
 
@@ -32,8 +32,9 @@ export default {
             pages: [
                 {title: "Home", route: "/"},
                 {title: "Galeria", route: "/gallery"},
-                {title: "Agendamento", route: "/agendamento"},
-                {title: "Cadastro de Endereço", route: "/register-address"}
+                {title: "Agendamento", route: "/scheduling"},
+                {title: "Cadastro de Endereço", route: "/register-address"},
+                {title: "Área restrita", route: "/restricted-area"}
             ],
             isLoggedIn: true
         }

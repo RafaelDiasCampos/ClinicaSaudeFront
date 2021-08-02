@@ -7,31 +7,24 @@
           <v-tab v-for="tab in tabs" :key="tab.name">{{ tab.name }} </v-tab>
           <v-tab-item v-for="tab in tabs" :key="tab.name">
             <v-toolbar>
-              <v-toolbar-title
-                ><h4>{{ tab.title }}</h4></v-toolbar-title
-              >
+              <v-toolbar-title>
+                <h4>{{ tab.title }}</h4>
+              </v-toolbar-title>
             </v-toolbar>
             <v-card>
               <v-card-text class="pt-4">
                 <div>
-                  <v-form>
-                    <v-text-field
-                      v-for="field in tab.fields"
-                      :key="field.name"
-                      v-model="fields[field].data"
-                      :rules="fields[field].rules"
-                      :label="fields[field].name"
-                      :type="fields[field].isPassword ? 'password' : 'text'"
-                      shaped
-                      outlined
-                    ></v-text-field>
-                    <v-layout justify-space-between>
-                      <v-btn @click="submit" color="primary">{{
-                        tab.actionName
-                      }}</v-btn>
-                      <a href="" v-if="tab.isLogin">Esqueci minha senha</a>
-                    </v-layout>
-                  </v-form>
+                  <TextForm
+                    :fields="
+                      Object.keys(fields)
+                        .filter((key) => tab.fields.includes(key))
+                        .reduce((obj, key) => {
+                          obj[key] = fields[key];
+                          return obj;
+                        }, {})
+                    "
+                    :isLogin="tab.isLogin"
+                  ></TextForm>
                 </div>
               </v-card-text>
             </v-card>
@@ -43,24 +36,11 @@
 </template>
 
 <script>
+import TextForm from "@/components/TextForm";
 export default {
-  methods: {
-    validate() {
-      this.$refs.form.validate();
-    },
-    reset() {
-      this.$refs.form.reset();
-    },
-    resetValidation() {
-      this.$refs.form.resetValidation();
-    },
-    submit() {
-      return 0;
-    },
-  },
+  components: { TextForm },
   data() {
     return {
-      valid: true,
       tab: 0,
       tabs: [
         {

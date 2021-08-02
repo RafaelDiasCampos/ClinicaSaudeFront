@@ -1,10 +1,13 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+
 import Home from '../views/Home.vue'
 import Gallery from '../views/Gallery.vue'
 import Login from '../views/Login.vue'
 import Profile from '../views/Profile.vue'
 import RegisterAddress from '../views/RegisterAddress.vue'
+import Scheduling from '../views/Scheduling.vue'
+import RestrictedArea from '../views/RestrictedArea.vue'
 
 Vue.use(VueRouter)
 
@@ -13,14 +16,6 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home
-  },
-  {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
   },
   {
     path: '/gallery',
@@ -41,6 +36,16 @@ const routes = [
     path: '/register-address',
     name: 'Register Address',
     component: RegisterAddress
+  },
+  {
+    path: '/scheduling',
+    name: 'Scheduling',
+    component: Scheduling
+  },
+  {
+    path: '/restricted-area',
+    name: 'Restricted Area',
+    component: RestrictedArea
   }
 ]
 
