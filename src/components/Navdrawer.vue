@@ -8,7 +8,7 @@
             </v-list-item>
             <v-divider></v-divider>
             <v-list>
-            <v-list-item v-for="item in items" :key="item.title" link :class="item.isActive ? 'v-btn--active' : ''">
+            <v-list-item v-for="item in items" :key="item.title" link :class="item.isActive ? 'v-btn--active' : ''" @click="setActive(item)">
                 <v-list-item-icon>
                     <v-icon>{{ item.icon }}</v-icon>
                 </v-list-item-icon>
@@ -23,6 +23,15 @@
 
 <script>
 export default {
+    methods: {
+        setActive(item) {
+            for (let item of this.items) {
+                item.isActive = false;
+            }
+            item.isActive = true;
+            this.$emit('changeTab', item.title);
+        }
+    },
     data() {
         return {
             items: [

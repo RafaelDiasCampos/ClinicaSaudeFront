@@ -2,6 +2,14 @@
   <div class="scheduling">
     <v-container fluid fill-height justify-center>
       <v-flex xs12 sm4 elevation-6>
+        <v-alert
+            type="success"
+            v-if="success"
+          >Consulta agendada com sucesso</v-alert>
+          <v-alert
+            type="error"
+            v-if="error"
+          >Erro ao agendar a consulta</v-alert>
         <v-toolbar flat>
           <v-toolbar-title><h4>Agendamento de Consultas</h4></v-toolbar-title>
         </v-toolbar>
@@ -9,6 +17,27 @@
           <v-card-text class="pt-4">
             <div>
               <v-form>
+                <v-text-field
+                  label="Nome"
+                  v-model="fields.nome.data"
+                  prepend-icon="mdi-account"
+                  shaped
+                  outlined
+                ></v-text-field>
+                <v-text-field
+                  label="E-mail"
+                  v-model="fields.email.data"
+                  prepend-icon="mdi-at"
+                  shaped
+                  outlined
+                ></v-text-field>
+                <v-text-field
+                  label="Telefone"
+                  v-model="fields.telefone.data"
+                  prepend-icon="mdi-phone"
+                  shaped
+                  outlined
+                ></v-text-field>
                 <v-autocomplete
                   v-model="fields.especialidade.data"
                   :items="fields.especialidade.items"
@@ -17,11 +46,13 @@
                   @change="specialtyChanged()"
                 ></v-autocomplete>
                 <v-autocomplete
-                  v-model="fields.medico.data"
-                  :items="fields.medico.items"
+                  v-model="fields.codigomedico.data"
+                  :items="fields.codigomedico.items"
                   prepend-icon="mdi-doctor"
                   label="Médico"
-                  :disabled="fields.medico.disabled"
+                  item-text="nome"
+                  item-value="codigo"
+                  :disabled="fields.codigomedico.disabled"
                   @change="doctorChanged()"
                 ></v-autocomplete>
                 <v-menu
@@ -51,11 +82,11 @@
                   ></v-date-picker>
                 </v-menu>
                 <v-select
-                  v-model="fields.hora.data"
-                  :items="fields.hora.items"
+                  v-model="fields.horario.data"
+                  :items="fields.horario.items"
                   prepend-icon="mdi-clock"
                   label="Horário"
-                  :disabled="fields.hora.disabled"
+                  :disabled="fields.horario.disabled"
                 ></v-select>
                 <v-layout justify-space-between>
                   <v-btn @click="submit" color="primary"
@@ -68,7 +99,6 @@
         </v-card>
       </v-flex>
     </v-container>
-    <v-snackbar v-model="snackbar.isVisible" :timeout=3000 color="success">{{ snackbar.text }}</v-snackbar>
   </div>
 </template>
 
@@ -85,7 +115,26 @@ export default {
       this.$refs.form.resetValidation();
     },
     submit() {
-      this.snackbar.isVisible = true
+      let formData = {};
+      for (let field in this.fields) {
+        formData[field] = this.fields[field].data;
+      }
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+        credentials: 'include',        
+      };
+      fetch(`${this.$store.state.apiUrl}/api/agenda`, requestOptions)
+        .then(() => {
+          this.success = true;
+          setTimeout( () => this.success = false, 3000);
+        })
+        .catch(() => {
+          this.error = true;
+          setTimeout( () => this.error = false, 3000);
+        })
+      
     },
     clearAndDisableFields(fields) {
       for (const field of fields) {
@@ -96,45 +145,69 @@ export default {
     },
     specialtyChanged() {
       if (this.fields.especialidade.data) {
-        this.fields.medico.disabled = false
-        // Acquire doctor data
+        this.fields.codigomedico.disabled = false
+        this.fetchDoctors();
       }
 
-      this.clearAndDisableFields(["medico", "data", "hora"])
+      this.clearAndDisableFields(["codigomedico", "data", "horario"])
     },
     doctorChanged() {
-      if (this.fields.medico.data) {
+      if (this.fields.codigomedico.data) {
         this.fields.data.disabled = false
-        // Acquire date data
       }
 
-      this.clearAndDisableFields(["data", "hora"])
+      this.clearAndDisableFields(["data", "horario"])
     },
     dateChanged() {
       if (this.fields.data.data) {
-        this.fields.hora.disabled = false
-        // Acquire time data
+        this.fields.horario.disabled = false
+        this.fetchTime();
       }
 
-      this.clearAndDisableFields(["hora"])
+      this.clearAndDisableFields(["horario"])
+    },
+    fetchDoctors() {
+      const requestOptions = {method: "GET", credentials: 'include'};
+        fetch(`${this.$store.state.apiUrl}/api/medico/${this.fields.especialidade.data}`, requestOptions)
+        .then(response => {
+          if (response.status == 201) {
+            response.json()
+            .then(data => (this.fields.codigomedico.items = data));
+          }          
+        })
+    },
+    fetchTime() {
+      const requestOptions = {
+        method: "PATCH", 
+        credentials: 'include',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          medicoId: this.fields.codigomedico.data,
+          data: this.fields.data.data
+          }),
+        };
+
+        fetch(`${this.$store.state.apiUrl}/api/agenda`, requestOptions)
+        .then(response => {
+          if (response.status == 201) {
+            response.json()
+            .then(data => (this.fields.horario.items = data));
+          }          
+        })
     }
   },
   data() {
     return {
-      snackbar: {
-        isVisible: false,
-        text: "Agendamento realizado com sucesso!"
-      },
       fields: {
         especialidade: {
           data: "",
           disabled: false,
-          items: ["Abc", "Def", "Ghi"]
+          items: this.$store.state.especialidades
         },
-        medico: {
+        codigomedico: {
           data: "",
           disabled: true,
-          items: ["Medico 1", "Medico 2", "Medico 3"]
+          items: []
         },
         data: {
           data: "",
@@ -142,12 +215,23 @@ export default {
           activePicker: null,
           disabled: true,
         },
-        hora: {
+        horario: {
           data: "",
           disabled: true,
-          items: ["7:00-8:00", "10:00-11:00", "16:00-17:00"]
+          items: []
         },
+        nome: {
+          data: ""
+        },
+        email: {
+          data: ""
+        },
+        telefone: {
+          data: ""
+        }
       },
+      success: false,
+      error: false
     };
   },
 };

@@ -1,5 +1,5 @@
 <template>
-  <div class="employees">
+  <div class="pacients">
     <v-container>
       <v-data-table :headers="headers" :items="data">
         <template v-slot:top>
@@ -20,7 +20,7 @@
               </template>
               <v-card>
                 <v-card-title>
-                  <span class="text-h5">Novo Funcionário</span>
+                  <span class="text-h5">Novo Paciente</span>
                 </v-card-title>
 
                 <v-card-text>
@@ -34,25 +34,10 @@
                           outlined
                         ></v-text-field>
                       </v-col>
-                      <v-col cols="12" sm="6" md="8">
+                      <v-col cols="12" sm="6" md="12">
                         <v-text-field
                           label="E-mail"
                           v-model="editedItem.email"
-                          shaped
-                          outlined
-                        ></v-text-field>
-                      </v-col>
-                      <v-col cols="12" sm="6" md="4">
-                        <v-checkbox
-                          label="Médico"
-                          v-model="editedItem.isMedico"
-                        ></v-checkbox>
-                      </v-col>
-                      <v-col cols="12" sm="6" md="12">
-                        <v-text-field
-                          label="Senha"
-                          v-model="editedItem.senha"
-                          type="password"
                           shaped
                           outlined
                         ></v-text-field>
@@ -107,57 +92,28 @@
                           outlined
                         ></v-text-field>
                       </v-col>
-                      <v-col cols="12" sm="6" md="6">
-                        <v-menu
-                          ref="menu"
-                          v-model="dateMenu"
-                          :close-on-content-click="true"
-                          transition="scale-transition"
-                          offset-y
-                          min-width="auto"
-                        >
-                          <template v-slot:activator="{ on, attrs }">
-                            <v-text-field
-                              v-model="editedItem.datacontrato"
-                              label="Data de Início"
-                              prepend-icon="mdi-calendar"
-                              readonly
-                              v-bind="attrs"
-                              v-on="on"
-                            ></v-text-field>
-                          </template>
-                          <v-date-picker
-                            v-model="editedItem.datacontrato"
-                            :active-picker.sync="dateActivePicker"
-                            :min="
-                              new Date(Date.now()).toISOString().substr(0, 10)
-                            "
-                          ></v-date-picker>
-                        </v-menu>
-                      </v-col>
-                      <v-col cols="12" sm="6" md="6">
+                      <v-col cols="12" sm="6" md="4">
                         <v-text-field
-                          label="Salário"
-                          v-model="editedItem.salario"
+                          label="Peso"
+                          v-model="editedItem.peso"
                           shaped
                           outlined
                         ></v-text-field>
                       </v-col>
-                      <v-col v-if="editedItem.isMedico" cols="12" sm="6" md="6">
-                        <v-autocomplete
-                          v-model="editedItem.especialidade"
-                          :items="especialidades"
-                          prepend-icon="mdi-format-list-bulleted-type"
-                          label="Especialidade"
-                        ></v-autocomplete>
-                      </v-col>
-                      <v-col v-if="editedItem.isMedico" cols="12" sm="6" md="6">
+                      <v-col cols="12" sm="6" md="4">
                         <v-text-field
-                          label="CRM"
-                          v-model="editedItem.crm"
+                          label="Altura"
+                          v-model="editedItem.altura"
                           shaped
                           outlined
                         ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="6" md="4">
+                        <v-select
+                        v-model="editedItem.tiposanguineo"
+                        :items="tiposSanguineos"
+                        label="Tipo Sanguíneo"
+                        ></v-select>
                       </v-col>
                     </v-row>
                   </v-container>
@@ -218,7 +174,7 @@ export default {
         });
     },
     initialize() {
-      this.fetchEmployees();        
+      this.fetchPacients();        
     },
     close() {
       this.dialogNew = false;
@@ -234,16 +190,12 @@ export default {
         credentials: 'include',
       };
 
-      let url = `${this.$store.state.apiUrl}/api/funcionario`;
-      if (this.editedItem.isMedico) {
-        url = `${this.$store.state.apiUrl}/api/medico`
-      }
-      fetch(url, requestOptions)
+      fetch(`${this.$store.state.apiUrl}/api/paciente`, requestOptions)
         .then(() => {
           this.success = true;
           setTimeout( () => this.success = false, 3000);
           this.close();
-          this.fetchEmployees();
+          this.fetchPacients();
           this.$nextTick(() => {
             this.editedItem = Object.assign({}, this.defaultItem);
           });
@@ -256,9 +208,9 @@ export default {
           });
         })
     },
-    fetchEmployees() {
+    fetchPacients() {
       const requestOptions = {method: "GET", credentials: 'include'};
-        fetch(`${this.$store.state.apiUrl}/api/funcionario`, requestOptions)
+        fetch(`${this.$store.state.apiUrl}/api/paciente`, requestOptions)
         .then(response => {
           if (response.status == 201) {
             response.json()
@@ -270,10 +222,9 @@ export default {
   data() {
     return {
       dateMenu: false,
-      dateActivePicker: null,
       dialogNew: false,
-      title: "Funcionários",
-      formTitle: "Novo Funcionário",
+      title: "Pacientes",
+      formTitle: "Novo Paciente",
       cepMask: "##-###-###",
       headers: [
         {
@@ -309,27 +260,20 @@ export default {
           value: "estado",
         },
         {
-          text: "Data de Início",
-          value: "datacontrato",
+          text: "Peso",
+          value: "peso",
         },
         {
-          text: "Salário",
-          value: "salario",
+          text: "Altura",
+          value: "altura",
         },
         {
-          text: "Médico",
-          value: "isMedico",
-        },
-        {
-          text: "Especialidade",
-          value: "especialidade",
-        },
-        {
-          text: "CRM",
-          value: "crm",
-        },
+          text: "Tipo Sanguíneo",
+          value: "tiposanguineo",
+        }
       ],
       data: [],
+      tiposSanguineos: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
       editedItem: {},
       defaultItem: {
         nome: "",
@@ -340,12 +284,9 @@ export default {
         bairro: "",
         cidade: "",
         estado: "",
-        datacontrato: new Date(Date.now()).toISOString().substr(0, 10),
-        salario: "",
-        senha: "",
-        isMedico: false,
-        especialidade: "",
-        crm: "",
+        peso: "",
+        altura: "",
+        tiposanguineo: ""
       },
       especialidades: this.$store.state.especialidades,
     };
