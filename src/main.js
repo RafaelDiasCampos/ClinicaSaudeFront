@@ -20,12 +20,12 @@ const store = new Vuex.Store({
   mutations: {
     getUser(state) {
         const requestOptions = {method: "GET", credentials: 'include'};
-        fetch(`${state.apiUrl}/api/usuarios`, requestOptions)
+        fetch(`${state.apiUrl}/api/funcionario/self`, requestOptions)
         .then(response => {
         if (response.status == 201) {
             response.json()
             .then(data => {
-                state.user = data;
+                state.user = data[0];
                 state.isLoggedIn = true;
             });
         }

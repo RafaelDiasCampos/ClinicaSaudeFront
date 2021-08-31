@@ -5,6 +5,8 @@
         <template v-slot:top>
           <v-toolbar flat>
             <v-toolbar-title>{{ title }}</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-btn v-if="$store.state.user.isMedico" v-on:click="toggleFilterByDoctor()" :class="filterByDoctor ? 'v-btn--active' : ''">Somente meus</v-btn>
           </v-toolbar>
         </template>
         <template v-slot:no-data>
@@ -21,10 +23,18 @@ export default {
   created() {
         this.initialize();
   },
-  methods: {    
+  methods: {
+    toggleFilterByDoctor() {
+      this.filterByDoctor = !this.filterByDoctor;
+      this.initialize();
+    },
     initialize () {
         const requestOptions = {method: "GET", credentials: 'include'};
-        fetch(`${this.$store.state.apiUrl}/api/agenda`, requestOptions)
+        let url = `${this.$store.state.apiUrl}/api/agenda`;
+        if (this.filterByDoctor) {
+          url = `${this.$store.state.apiUrl}/api/agenda/medico`;
+        }
+        fetch(url, requestOptions)
         .then(response => response.json())
         .then(data => (this.data = data));
     },
@@ -59,6 +69,7 @@ export default {
         }
       ],
       data: [],
+      filterByDoctor: false,
     };
   },
 };
